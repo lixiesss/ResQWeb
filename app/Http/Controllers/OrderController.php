@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Food;
 use App\Models\Order;
+use App\Models\Review;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -14,11 +15,15 @@ class OrderController extends Controller
     public function store(Request $request, $food_id)
     {
         $request->validate([
-            'quantity' => 'required|integer|min:1'
+            'quantity' => 'required|integer|min:1',
+            'accepted_order_terms' => 'accepted',
         ]);
 
         $food = Food::findOrFail($food_id);
         $quantity = $request->quantity;
+        $subtotal = $food->discount_price * $quantity;
+        $adminFee = ceil($subtotal * (config('resq.admin_fee_percentage', 5) / 100));
+        $totalPrice = $subtotal + $adminFee;
 
         // Cek apakah stok mencukupi
         if ($food->stock < $quantity) {
@@ -26,13 +31,15 @@ class OrderController extends Controller
         }
 
         // Gunakan DB Transaction agar data aman. Jika di tengah jalan error, semua dibatalkan (rollback).
-        DB::transaction(function () use ($food, $quantity) {
+        DB::transaction(function () use ($food, $quantity, $subtotal, $adminFee, $totalPrice) {
             // 1. Catat Pesanan ke tabel orders
             Order::create([
                 'customer_id' => Auth::id(),
                 'food_id' => $food->id,
                 'quantity' => $quantity,
-                'total_price' => $food->discount_price * $quantity,
+                'subtotal_price' => $subtotal,
+                'admin_fee' => $adminFee,
+                'total_price' => $totalPrice,
                 'status' => 'pending', // Status pending (menunggu diambil/dibayar di tempat)
             ]);
 
@@ -46,7 +53,7 @@ class OrderController extends Controller
         });
 
         // Arahkan ke halaman riwayat pesanan dengan pesan sukses
-        return redirect()->route('order.history')->with('success', 'Yey! Pesanan berhasil dibuat. Silakan ambil di resto sesuai waktu pickup ya.');
+        return redirect()->route('order.history')->with('success', 'Pesanan berhasil dibuat. Silakan ambil sesuai jadwal pickup. Total sudah termasuk biaya admin platform.');
     }
 
     // Menampilkan halaman Riwayat Pesanan untuk Customer
@@ -58,7 +65,13 @@ class OrderController extends Controller
                     ->latest()
                     ->get();
 
-        return view('customer.orders', compact('orders'));
+        $reviews = Review::where('customer_id', Auth::id())
+            ->whereIn('order_id', $orders->pluck('id'))
+            ->get()
+            ->groupBy('order_id')
+            ->map(fn ($items) => $items->pluck('id', 'target_type')->all());
+
+        return view('customer.orders', compact('orders', 'reviews'));
     }
     // Menampilkan daftar pesanan masuk untuk Seller (Pak Budi)
     public function sellerOrders()

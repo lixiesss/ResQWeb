@@ -21,82 +21,65 @@
 
                 <div class="overflow-x-auto">
                     <table class="w-full text-left border-collapse">
-    <thead>
-        <tr class="bg-gray-50/50 border-b border-gray-100">
-            <th class="py-4 px-6 text-xs font-bold text-gray-400 uppercase tracking-wider">Info Makanan</th>
-            <th class="py-4 px-6 text-xs font-bold text-gray-400 uppercase tracking-wider">Harga</th>
-            <th class="py-4 px-6 text-xs font-bold text-gray-400 uppercase tracking-wider text-center">Sisa Stok</th>
-            <th class="py-4 px-6 text-xs font-bold text-gray-400 uppercase tracking-wider">Waktu Pickup</th>
-            <th class="py-4 px-6 text-xs font-bold text-gray-400 uppercase tracking-wider text-right">Aksi</th>
-        </tr>
-    </thead>
-    <tbody class="divide-y divide-gray-50">
-        @forelse($foods as $food)
-            <tr class="hover:bg-gray-50 transition">
-                <td class="py-4 px-6">
-                    <p class="text-sm font-bold text-gray-800">{{ $food->name }}</p>
-                    <p class="text-xs text-gray-400 mt-1">{{ $food->description ?: 'Tidak ada deskripsi' }}</p>
-                </td>
-                <td class="py-4 px-6">
-                    <span class="text-sm font-extrabold text-orange-600">Rp {{ number_format($food->discount_price, 0, ',', '.') }}</span>
-                </td>
-                <td class="py-4 px-6 text-center">
-                    <span class="inline-flex items-center justify-center px-3 py-1 rounded-md {{ $food->stock > 0 ? 'bg-orange-100 text-orange-700' : 'bg-gray-100 text-gray-500' }} font-bold text-xs">
-                        {{ $food->stock }} porsi
-                    </span>
-                </td>
-                <td class="py-4 px-6 text-sm text-gray-500 font-medium">
-                    {{ \Carbon\Carbon::parse($food->pickup_time_start)->format('H:i') }} - {{ \Carbon\Carbon::parse($food->pickup_time_end)->format('H:i') }}
-                </td>
-                <td class="py-4 px-6 text-right">
-                   <form action="{{ route('food.destroy', $food->id) }}" method="POST" id="delete-form-{{ $food->id }}">
-                        @csrf
-                        @method('DELETE')
-                        <button type="button" onclick="hapusMakanan({{ $food->id }})" class="text-gray-400 hover:text-red-600 transition">
-                            <svg class="w-5 h-5 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                            </svg>
-                        </button>
-                    </form>
-                </td>
-            </tr>
-        @empty
-            <tr>
-                <td colspan="5" class="py-12 text-center text-gray-500 font-medium">Belum ada makanan yang diunggah.</td>
-            </tr>
-        @endforelse
-    </tbody>
-</table>
+                        <thead>
+                            <tr class="bg-gray-50/50 border-b border-gray-100">
+                                <th class="py-4 px-6 text-xs font-bold text-gray-400 uppercase tracking-wider">Info Makanan</th>
+                                <th class="py-4 px-6 text-xs font-bold text-gray-400 uppercase tracking-wider">Harga</th>
+                                <th class="py-4 px-6 text-xs font-bold text-gray-400 uppercase tracking-wider text-center">Sisa Stok</th>
+                                <th class="py-4 px-6 text-xs font-bold text-gray-400 uppercase tracking-wider">Waktu Pickup</th>
+                                <th class="py-4 px-6 text-xs font-bold text-gray-400 uppercase tracking-wider text-right">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-50">
+                            @forelse($foods as $food)
+                                <tr class="hover:bg-gray-50 transition">
+                                    <td class="py-4 px-6">
+                                        <p class="text-sm font-bold text-gray-800">{{ $food->name }}</p>
+                                        <p class="text-xs text-gray-400 mt-1">{{ $food->description ?: 'Tidak ada deskripsi' }}</p>
+                                    </td>
+                                    <td class="py-4 px-6">
+                                        <span class="text-sm font-extrabold text-orange-600">Rp {{ number_format($food->discount_price, 0, ',', '.') }}</span>
+                                    </td>
+                                    <td class="py-4 px-6 text-center">
+                                        <span class="inline-flex items-center justify-center px-3 py-1 rounded-md {{ $food->stock > 0 ? 'bg-orange-100 text-orange-700' : 'bg-gray-100 text-gray-500' }} font-bold text-xs">
+                                            {{ $food->stock }} porsi
+                                        </span>
+                                    </td>
+                                    <td class="py-4 px-6 text-sm text-gray-500 font-medium">
+                                        {{ \Carbon\Carbon::parse($food->pickup_time_start)->format('H:i') }} - {{ \Carbon\Carbon::parse($food->pickup_time_end)->format('H:i') }}
+                                    </td>
+                                    <td class="py-4 px-6 text-right">
+                                        <form
+                                            action="{{ route('food.destroy', $food->id) }}"
+                                            method="POST"
+                                            id="delete-form-{{ $food->id }}"
+                                            data-confirm-submit
+                                            data-confirm-title="Hapus makanan ini?"
+                                            data-confirm-text="Menu akan dihapus permanen dari katalog dan tidak bisa dikembalikan."
+                                            data-confirm-button="Ya, hapus"
+                                            data-confirm-icon="warning"
+                                            data-loading-message="Makanan sedang dihapus."
+                                        >
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" data-loading-text="Menghapus..." class="text-gray-400 hover:text-red-600 transition">
+                                                <svg class="w-5 h-5 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                                </svg>
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="5" class="py-12 text-center text-gray-500 font-medium">Belum ada makanan yang diunggah.</td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
                 </div>
             </div>
 
         </div>
     </div>
 </x-app-layout>
-
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script>
-        function hapusMakanan(id) {
-            Swal.fire({
-                title: 'Hapus Makanan?',
-                text: "Menu ini akan dihapus permanen dari katalog dan tidak bisa dikembalikan.",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#ea580c', // Warna tailwind orange-600
-                cancelButtonColor: '#9ca3af', // Warna tailwind gray-400
-                confirmButtonText: 'Ya, Hapus!',
-                cancelButtonText: 'Batal',
-                reverseButtons: true, // Posisi tombol batal di kiri (standar UI modern)
-                customClass: {
-                    popup: 'rounded-3xl',
-                    confirmButton: 'px-6 py-2.5 rounded-xl font-bold shadow-md',
-                    cancelButton: 'px-6 py-2.5 rounded-xl font-bold'
-                }
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    // Jika user klik "Ya", jalankan submit form
-                    document.getElementById('delete-form-' + id).submit();
-                }
-            })
-        }
-    </script>

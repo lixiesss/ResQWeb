@@ -1,12 +1,15 @@
 <?php
 use App\Http\Controllers\FoodController;
+use App\Http\Controllers\LegalController;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\ReviewController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\ProfileController;
 
 // 1. Halaman Landing Page langsung diarahkan ke Login
 Route::redirect('/', '/login');
+Route::get('/terms-and-conditions', [LegalController::class, 'terms'])->name('terms.show');
 
 // ==== RUTE UNTUK CUSTOMER (AGUS) ====
 Route::middleware(['auth', 'role:customer'])->group(function () {
@@ -14,6 +17,7 @@ Route::middleware(['auth', 'role:customer'])->group(function () {
     Route::post('/order/{food_id}', [OrderController::class, 'store'])->name('order.store');
     Route::get('/my-orders', [OrderController::class, 'myOrders'])->name('order.history');
     Route::get('/toko/{id}', [FoodController::class, 'storeProfile'])->name('toko.show');
+    Route::post('/orders/{order}/reviews', [ReviewController::class, 'store'])->name('reviews.store');
 });
 
 // ==== RUTE UNTUK SELLER (PAK BUDI) ====
@@ -41,6 +45,7 @@ Route::get('/dashboard', function () {
 
 // ==== RUTE PROFIL BAWAAN BREEZE ====
 Route::middleware('auth')->group(function () {
+    Route::get('/pnc', [LegalController::class, 'pnc'])->name('pnc.show');
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');

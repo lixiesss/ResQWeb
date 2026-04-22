@@ -63,19 +63,5 @@ class DatabaseSeeder extends Seeder
             'pickup_time_end' => '22:30',
             'status' => 'available',
         ]);
-
-        // 5. Buat Data Dummy Order (Agus memesan Nasi Ayam Penyet Pak Budi)
-        Order::create([
-            'customer_id' => $customer->id,
-            'food_id' => $food1->id,
-            'quantity' => 1,
-            'total_price' => 10000,
-            'status' => 'pending',
-            'created_at' => Carbon::now(),
-            'updated_at' => Carbon::now(),
-        ]);
-
-        // Kurangi stok karena sudah dipesan di seeder
-        $food1->decrement('stock', 1);
     }
 }

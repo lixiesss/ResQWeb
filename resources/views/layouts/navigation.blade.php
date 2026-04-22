@@ -28,6 +28,8 @@
                     @if(Auth::user()->role == 'admin')
                         <a href="{{ route('admin.dashboard') }}" class="inline-flex items-center px-1 pt-1 border-b-2 text-sm font-semibold transition duration-150 ease-in-out {{ request()->routeIs('admin.dashboard') ? 'border-orange-500 text-orange-600' : 'border-transparent text-gray-500 hover:text-orange-500 hover:border-orange-300' }}">Dashboard</a>
                     @endif
+
+                    <a href="{{ route('terms.show') }}" class="inline-flex items-center px-1 pt-1 border-b-2 text-sm font-semibold transition duration-150 ease-in-out {{ request()->routeIs('terms.show') ? 'border-orange-500 text-orange-600' : 'border-transparent text-gray-500 hover:text-orange-500 hover:border-orange-300' }}">T&C</a>
                 </div>
             </div>
 
